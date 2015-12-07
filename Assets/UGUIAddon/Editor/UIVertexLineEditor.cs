@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEditor;
-[CustomEditor(typeof(KwLine))]
-public class KwLineEditor : Editor {
-    
-    KwLine owner { get { return target as KwLine; } }
+[CustomEditor(typeof(UIVertexLine))]
+public class UIVertexLineEditor : Editor {
+
+    UIVertexLine owner { get { return target as UIVertexLine; } }
     Quaternion handlesRotation;
     void OnSceneGUI()
     {
