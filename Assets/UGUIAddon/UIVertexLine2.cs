@@ -1,20 +1,23 @@
 ﻿using UnityEngine;
 using System.Collections;
+
 using UnityEngine.UI;
 using System.Collections.Generic;
 
+public class UIVertexLine2 : MaskableGraphic, IMeshModifier
+{
+   
+    public AnimationCurve curve;
+    public List<LinePoint> list = new List<LinePoint>();
 
-public class UILine : MaskableGraphic, IMeshModifier {
-    // Use this for initialization
-    public List<Vector3> points = new List<Vector3>();
-    
     public void ModifyMesh(VertexHelper vh)
     {
         EditMesh(vh);
     }
+
     public void ModifyMesh(Mesh mesh)
     {
-        using(var vh = new VertexHelper(mesh))
+        using (var vh = new VertexHelper(mesh))
         {
             EditMesh(vh);
             vh.FillMesh(mesh);
@@ -23,8 +26,6 @@ public class UILine : MaskableGraphic, IMeshModifier {
 
     void EditMesh(VertexHelper vh)
     {
-     
-               
+        
     }
-    
 }
