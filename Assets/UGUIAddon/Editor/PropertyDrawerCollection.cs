@@ -16,7 +16,7 @@ public class LinePointDrawer : PropertyDrawer {
         {
             var next = property.FindPropertyRelative("isNextCurve").boolValue;
             var prv = property.FindPropertyRelative("isPrvCurve").boolValue;
-
+            
             var positionRect = new Rect(position.x + 65, position.y + 16, 140f, 16f);
             var positionPrvBool = new Rect(position.x + 10, position.y + 16, 30f, 16f);
             var positionNextBool = new Rect(position.x + 215, position.y + 16, 30f, 16f);

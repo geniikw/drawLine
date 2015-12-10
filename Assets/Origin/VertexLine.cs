@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
-public class UIVertexLine : MonoBehaviour
+public class VertexLine : MonoBehaviour
 {
     MeshFilter meshfilter { get { return GetComponent<MeshFilter>(); } }
     MeshRenderer meshRender { get { return GetComponent<MeshRenderer>(); } }
