@@ -6,7 +6,6 @@ using System.Collections.Generic;
 
 public class UIMeshLine : MaskableGraphic, IMeshModifier
 {
-    public AnimationCurve curve;
     public List<LinePoint> points = new List<LinePoint>();
     public float width = 10f;
 
