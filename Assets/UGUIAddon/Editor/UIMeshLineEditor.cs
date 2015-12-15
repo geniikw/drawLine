@@ -11,7 +11,7 @@ public class UIMeshLineEditor : Editor {
     void OnSceneGUI()
     {
         HandlesForPoints();
-        DrawLineInScene();
+        //DrawLineInScene(); //for debug
     }
     void DrawLineInScene()
     {

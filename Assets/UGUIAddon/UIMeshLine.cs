@@ -17,7 +17,7 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
 
     public bool fillLineJoint = false;
     public float fillDivideAngle = 25f;
-
+          
     public float lineLength
     {
         get
@@ -30,7 +30,8 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
             return sum;
         }
     }
-
+    public bool roundEdge = false;
+    public int roundEdgePolygonCount = 5;
     /// Methods
     
     public void ModifyMesh(VertexHelper vh)
@@ -60,6 +61,7 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
         float ratio = LengthRatio(index);
         float ratioEnd = LengthRatio(index + 1);
 
+        
         if (IsCurve(index))
         {
             float curveLength = 0f;
@@ -80,6 +82,15 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
                 currentRatio += Vector2.Distance(p0, p1)/curveLength * (ratioEnd - ratio);
                 Color c1 = useGradient ? gradient.Evaluate(currentRatio) : color;
 
+                if (roundEdge && index == 0 && n==0)
+                {
+                    DrawRoundRdge(vh, p0, p1, c0);
+                }
+                if (roundEdge && index == points.Count - 2 && n == divideCount-1)
+                {
+                    DrawRoundRdge(vh, p1, p0, c1);
+                }
+                
                 var quad = MakeQuad(vh, p0, p1, c0, c1, prvVert);
 
                 if (fillLineJoint && prvLineVert != null)
@@ -98,9 +109,21 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
             Vector3 p0 = points[index].point;
             Vector3 p1 = points[index+1].point;
 
+            
+
             Color c0 = useGradient ? gradient.Evaluate(ratio) : color;
             Color c1 = useGradient ? gradient.Evaluate(ratioEnd) : color;
-            
+
+            if (roundEdge && index == 0)
+            {
+                DrawRoundRdge(vh, p0, p1, c0);
+            }
+            if( roundEdge && index == points.Count - 2)
+            {
+                DrawRoundRdge(vh, p1, p0, c1);
+            }
+
+
             var quad = MakeQuad(vh, p0, p1, c0, c1);
 
             if (fillLineJoint && prvLineVert != null)
@@ -113,7 +136,6 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
             prvVert[0] = quad[3];
             prvVert[1] = quad[2];
         }
-        
         return prvVert;
     } 
     void FillJoint( VertexHelper vh, UIVertex vp0, UIVertex vp1, UIVertex[] prvLineVert, Color color)
@@ -254,6 +276,28 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
             sum += Vector2.Distance(points[n].point, points[n + 1].point);
         }
         return sum / lineLength;
+    }
+
+    public void DrawRoundRdge(VertexHelper vh, Vector2 p0, Vector2 p1, Color color)
+    {
+        Vector2 widthVector = Vector3.Cross(p0 - p1, new Vector3(0, 0, 1));
+        widthVector.Normalize();
+        widthVector = widthVector * width / 2f;
+        Vector2 lineVector = (p0 - p1).normalized * width / 2f;
+
+        int count = roundEdgePolygonCount;
+        int current = vh.currentVertCount;
+        float angleUnit = Mathf.PI / (count-1);
+
+        vh.AddVert(p0, color, Vector2.zero);
+        vh.AddVert(p0 + widthVector, color, Vector2.zero);
+        
+        for (int n = 0; n< count; n++)
+        {
+            vh.AddVert(p0 + Mathf.Cos(angleUnit * n) * widthVector + Mathf.Sin(angleUnit * n) * lineVector, color, Vector2.zero);
+            vh.AddTriangle(current, current + 1 + n, current + 2 + n);
+        }
+
     }
 
 }
