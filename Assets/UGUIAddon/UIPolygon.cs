@@ -3,6 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
+/// <summary>
+/// todo : 추가기능 시계방향으로 만들기.
+/// </summary>
+
 public class UIPolygon : MaskableGraphic, IMeshModifier
 {
     public List<PolygonVertexInfo> vertexInfoList = new List<PolygonVertexInfo>();
@@ -10,7 +14,7 @@ public class UIPolygon : MaskableGraphic, IMeshModifier
     public float offset = 0f;
 
     public bool innerPolygon = false;
-    [Header("innerPolygon 옵션에서 제로점과 가까울시 width의 예외처리가 되어있지 않음. ")]
+    [Header("innerPolygon 옵션에서 제로점과 가까울시 width의 예외처리가 되어있지 않음. ")][Range(0f,1f)]
     public float width = 1f;
     public bool vertexColorFlag = false;
     
@@ -44,7 +48,7 @@ public class UIPolygon : MaskableGraphic, IMeshModifier
 
         for (int n = 0; n < vertexInfoList.Count; n++)
         {
-            vh.AddVert(getRadiusPosition(vertexInfoList[n], n, 0), checkVertexColor(vertexInfoList[n].color) ,Vector2.zero);
+            vh.AddVert(getRadiusPosition(vertexInfoList[n], n), checkVertexColor(vertexInfoList[n].color) ,Vector2.zero);
         }
 
         if (!innerPolygon)
@@ -67,7 +71,7 @@ public class UIPolygon : MaskableGraphic, IMeshModifier
             }
         }
     }
-    Vector3 getRadiusPosition(PolygonVertexInfo info, int index, float w) 
+    Vector3 getRadiusPosition(PolygonVertexInfo info, int index, float scale=1f) 
     {
         if (vertexInfoList.Count < 3)
             return Vector3.zero;
@@ -79,10 +83,7 @@ public class UIPolygon : MaskableGraphic, IMeshModifier
         float offsetToAngle = offset / 360 * Mathf.PI * 2;
 
         Vector3 result = new Vector3(width * Mathf.Cos(angleUnit * index + offsetToAngle),  height* Mathf.Sin(angleUnit* index + offsetToAngle));
-
-        float length = result.magnitude - w;
-        
-        return result.normalized * length;
+        return result * scale;
     }
 
     Color checkVertexColor(Color vertexColor)

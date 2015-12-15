@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
+/// <summary>
+/// just reference for vertex line
+/// </summary>
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
 public class VertexLine : MonoBehaviour
@@ -36,6 +39,7 @@ public class VertexLine : MonoBehaviour
             {
                 meshfilter.sharedMesh = new Mesh();
             }
+            meshfilter.hideFlags = HideFlags.DontSave;
             mesh = meshfilter.sharedMesh;
         }
         int[] indices = new int[points.Count];
