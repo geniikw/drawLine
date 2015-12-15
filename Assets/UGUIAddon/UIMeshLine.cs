@@ -18,7 +18,22 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
 
     public bool fillLineJoint = false;
     public float fillDivideAngle = 25f;
-       
+
+    public float lineLength
+    {
+        get
+        {
+            float sum = 0f;
+            for (int n = 0; n < points.Count - 1; n++)
+            {
+                sum += Vector2.Distance(points[n].point, points[n + 1].point);
+            }
+            return sum;
+        }
+    }
+
+    /// Methods
+    
     public void ModifyMesh(VertexHelper vh)
     {
         EditMesh(vh);
@@ -40,23 +55,37 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
             prvVert = DrawLine(n, vh, prvVert);
         }
     }
-
     UIVertex[] DrawLine(int index, VertexHelper vh, UIVertex[] prvLineVert=null)
     {
         UIVertex[] prvVert = null;
-        
-        if (isCurve(index))
+        float ratio = LengthRatio(index);
+        float ratioEnd = LengthRatio(index + 1);
+
+        if (IsCurve(index))
         {
+            float curveLength = 0f;
+            float currentRatio = ratio;
+            for(int n =0; n< divideCount; n++)
+            {
+                Vector3 p0 = EvaluatePoint(index, 1f / divideCount * n);
+                Vector3 p1 = EvaluatePoint(index, 1f / divideCount * (n + 1));
+                curveLength += Vector2.Distance(p0, p1);
+            }
+
             for (int n = 0; n < divideCount; n++)
             {
                 Vector3 p0 = EvaluatePoint(index, 1f / divideCount * n);
                 Vector3 p1 = EvaluatePoint(index, 1f / divideCount * (n + 1));
                 
-                var quad = MakeQuad(vh, p0, p1,color,color, prvVert);
+                Color c0 = useGradient ? gradient.Evaluate(currentRatio) : color;
+                currentRatio += Vector2.Distance(p0, p1)/curveLength * (ratioEnd - ratio);
+                Color c1 = useGradient ? gradient.Evaluate(currentRatio) : color;
+
+                var quad = MakeQuad(vh, p0, p1, c0, c1, prvVert);
 
                 if (fillLineJoint && prvLineVert != null)
                 {
-                    FillJoint(vh, quad[0], quad[1], prvLineVert);
+                    FillJoint(vh, quad[0], quad[1], prvLineVert, c0);
                     prvLineVert = null;
                 }
 
@@ -68,13 +97,16 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
         else
         {
             Vector3 p0 = points[index].point;
-            Vector3 p1 = points[index + 1].point;
+            Vector3 p1 = points[index+1].point;
 
-            var quad = MakeQuad(vh, p0, p1,color,color);
+            Color c0 = useGradient ? gradient.Evaluate(ratio) : color;
+            Color c1 = useGradient ? gradient.Evaluate(ratioEnd) : color;
+            
+            var quad = MakeQuad(vh, p0, p1, c0, c1);
 
             if (fillLineJoint && prvLineVert != null)
             {
-                FillJoint(vh, quad[0], quad[1], prvLineVert);
+                FillJoint(vh, quad[0], quad[1], prvLineVert, c0);
                 prvLineVert = null;
             }
 
@@ -84,11 +116,9 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
         }
         
         return prvVert;
-    }
-        
-    void FillJoint( VertexHelper vh, UIVertex vp0, UIVertex vp1, UIVertex[] prvLineVert)
+    } 
+    void FillJoint( VertexHelper vh, UIVertex vp0, UIVertex vp1, UIVertex[] prvLineVert, Color color)
     {
-
         Vector3 forwardWidthVector = vp1.position - vp0.position;
         Vector3 prvWidthVector = prvLineVert[1].position - prvLineVert[0].position;
 
@@ -113,7 +143,6 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
 
         float angle = Vector3.Angle(p0 - center, p1 - center);
 
-
         int currentVert = vh.currentVertCount;
         int divideCount = (int)(angle / fillDivideAngle);
         if(divideCount == 0) { divideCount = 1; }
@@ -128,7 +157,6 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
             vh.AddTriangle(currentVert, currentVert + 1 + n, currentVert + 2 + n);
         } 
     }
-
     /// <summary>
     /// v0          v2  
     /// ┌─────┐  ↑
@@ -169,12 +197,6 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
         vh.AddUIVertexQuad(verts);
         return verts;
     }
-    /// <summary>
-    /// t가 0에서 1사이일때 p0 와 p1 사이를 보간..?
-    /// todo(delay) : prv에서 bool값을 판별해서 선별적으로 골라낼 필요가 있음...
-    /// 1개만 있으면 1차 배지어 곡선을 그리도록 바꾸자.
-    /// 2개면 평소대로 2차 배지어 곡선
-    /// </summary>
     public Vector2 EvaluatePoint(LinePoint p0, LinePoint p1, float t)
     {
         //t = t * t;//보정...
@@ -213,7 +235,7 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
         }
         return (p1.point - p0.point).normalized;
     }
-    public bool isCurve(int index)
+    public bool IsCurve(int index)
     {
         if (points.Count - 1 <= index)
         {
@@ -224,13 +246,15 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
 
         return false;
     }
-    public float lineLength(int index)
+      
+    public float LengthRatio(int i)
     {
-        if(points.Count - 1 <= index)
+        float sum = 0f;
+        for (int n = 0; n < i; n++)
         {
-            throw new System.Exception("인덱스가 작음 index:"+index);            
+            sum += Vector2.Distance(points[n].point, points[n + 1].point);
         }
-
-        return Vector2.Distance(points[index].point, points[index+1].point);
+        return sum / lineLength;
     }
+
 }

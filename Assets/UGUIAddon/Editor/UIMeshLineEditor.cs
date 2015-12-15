@@ -20,7 +20,7 @@ public class UIMeshLineEditor : Editor {
 
         for (int n = 0; n < owner.points.Count - 1; n++)
         {
-            if (owner.isCurve(n))
+            if (owner.IsCurve(n))
             {
                 float divide = owner.divideCount;
 
