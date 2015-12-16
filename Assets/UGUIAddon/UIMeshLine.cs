@@ -88,14 +88,27 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
                 Vector3 p1 = EvaluatePoint(index, 1f / divideCount * (n + 1));
 
                 Color c0 = useGradient ? gradient.Evaluate(currentRatio) : color;
-                currentRatio += Vector2.Distance(p0, p1) / curveLength * (ratioEnd - ratio);
+                float deltaRatio = Vector2.Distance(p0, p1) / curveLength * (ratioEnd - ratio);
+                currentRatio += deltaRatio;
                 Color c1 = useGradient ? gradient.Evaluate(currentRatio) : color;
+
+                ///check final
+                float length = GetLength(index + 1);
+                bool isFinal = false;
+                if (currentRatio > lengthRatio)
+                {
+                    currentRatio -= deltaRatio;
+                    float targetlength = lineLength * lengthRatio;
+                    Vector3 lineVector = p1 - p0;
+                    p1 = p0 + lineVector.normalized * (targetlength - lineLength * currentRatio);
+                    isFinal = true;
+                }
 
                 if (roundEdge && index == 0 && n == 0)
                 {
                     DrawRoundEdge(vh, p0, p1, c0);
                 }
-                if (roundEdge && index == points.Count - 2 && n == divideCount - 1)
+                if (roundEdge && index == points.Count - 2 && n == divideCount - 1 || isFinal)
                 {
                     DrawRoundEdge(vh, p1, p0, c1);
                 }
@@ -107,6 +120,9 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
                     FillJoint(vh, quad[0], quad[1], prvLineVert, c0);
                     prvLineVert = null;
                 }
+
+                if (isFinal)
+                    break;
 
                 if (prvVert == null) { prvVert = new UIVertex[2]; }
                 prvVert[0] = quad[3];
