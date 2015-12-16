@@ -6,12 +6,13 @@ using System.Collections.Generic;
 
 public class UIMeshLine : MaskableGraphic, IMeshModifier
 {
+    //todo : make UIMeshLine
+
     public List<LinePoint> points = new List<LinePoint>();
     public float width = 10f;
 
     [Range(1,100)]
     public int divideCount = 10;
-
     public bool useGradient = false;
     public Gradient gradient;
 
@@ -32,8 +33,10 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
     }
     public bool roundEdge = false;
     public int roundEdgePolygonCount = 5;
-    /// Methods
+    [Range(0, 1)][Header("0일땐 안그림 1일때 전부그림")]
+    public float lengthRatio = 1f;
     
+    /// UI Interface
     public void ModifyMesh(VertexHelper vh)
     {
         EditMesh(vh);
@@ -46,27 +49,33 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
             vh.FillMesh(mesh);
         }
     }
+    
+    /// private function
     void EditMesh(VertexHelper vh)
     {
         vh.Clear();
         UIVertex[] prvVert = null;
         for (int n  = 0; n < points.Count-1; n++)
         {
+            if (CheckLength(GetLength(n)))
+            {
+                break;
+            }
             prvVert = DrawLine(n, vh, prvVert);
+           
         }
     }
     UIVertex[] DrawLine(int index, VertexHelper vh, UIVertex[] prvLineVert=null)
     {
         UIVertex[] prvVert = null;
-        float ratio = LengthRatio(index);
-        float ratioEnd = LengthRatio(index + 1);
+        float ratio = GetLength(index)/lineLength;
+        float ratioEnd = GetLength(index + 1)/lineLength;
 
-        
         if (IsCurve(index))
         {
             float curveLength = 0f;
             float currentRatio = ratio;
-            for(int n =0; n< divideCount; n++)
+            for (int n = 0; n < divideCount; n++)
             {
                 Vector3 p0 = EvaluatePoint(index, 1f / divideCount * n);
                 Vector3 p1 = EvaluatePoint(index, 1f / divideCount * (n + 1));
@@ -77,20 +86,20 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
             {
                 Vector3 p0 = EvaluatePoint(index, 1f / divideCount * n);
                 Vector3 p1 = EvaluatePoint(index, 1f / divideCount * (n + 1));
-                
+
                 Color c0 = useGradient ? gradient.Evaluate(currentRatio) : color;
-                currentRatio += Vector2.Distance(p0, p1)/curveLength * (ratioEnd - ratio);
+                currentRatio += Vector2.Distance(p0, p1) / curveLength * (ratioEnd - ratio);
                 Color c1 = useGradient ? gradient.Evaluate(currentRatio) : color;
 
-                if (roundEdge && index == 0 && n==0)
+                if (roundEdge && index == 0 && n == 0)
                 {
-                    DrawRoundRdge(vh, p0, p1, c0);
+                    DrawRoundEdge(vh, p0, p1, c0);
                 }
-                if (roundEdge && index == points.Count - 2 && n == divideCount-1)
+                if (roundEdge && index == points.Count - 2 && n == divideCount - 1)
                 {
-                    DrawRoundRdge(vh, p1, p0, c1);
+                    DrawRoundEdge(vh, p1, p0, c1);
                 }
-                
+
                 var quad = MakeQuad(vh, p0, p1, c0, c1, prvVert);
 
                 if (fillLineJoint && prvLineVert != null)
@@ -107,23 +116,31 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
         else
         {
             Vector3 p0 = points[index].point;
-            Vector3 p1 = points[index+1].point;
-
-            
+            Vector3 p1 = points[index + 1].point;
 
             Color c0 = useGradient ? gradient.Evaluate(ratio) : color;
             Color c1 = useGradient ? gradient.Evaluate(ratioEnd) : color;
 
+            //todo length check
+            float length = GetLength(index + 1);
+            bool isFinal = false;
+            if (CheckLength(length))
+            {
+                float targetlength = lineLength * lengthRatio;
+                Vector3 lineVector = p1 - p0;
+                p1 = p0 + lineVector.normalized * (targetlength - GetLength(index));
+                isFinal = true;
+            }
+
             if (roundEdge && index == 0)
             {
-                DrawRoundRdge(vh, p0, p1, c0);
+                DrawRoundEdge(vh, p0, p1, c0);
             }
-            if( roundEdge && index == points.Count - 2)
+            if (roundEdge && index == points.Count - 2 || isFinal)
             {
-                DrawRoundRdge(vh, p1, p0, c1);
+                DrawRoundEdge(vh, p1, p0, c1);
             }
-
-
+            
             var quad = MakeQuad(vh, p0, p1, c0, c1);
 
             if (fillLineJoint && prvLineVert != null)
@@ -218,7 +235,7 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
         vh.AddUIVertexQuad(verts);
         return verts;
     }
-    public Vector2 EvaluatePoint(LinePoint p0, LinePoint p1, float t)
+    Vector2 EvaluatePoint(LinePoint p0, LinePoint p1, float t)
     {
         //t = t * t;//보정...
         if(p0.isNextCurve && !p1.isPrvCurve)
@@ -229,7 +246,6 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
         {
             return Curve.CalculateBezier(p0.point, p1.point, p1.prvCurvePoint, t);
         }
-
         if(p0.isNextCurve && p1.isPrvCurve)
         {
             return Curve.CalculateBezier(p0.point, p1.point, p0.nextCurvePoint, p1.prvCurvePoint, t);
@@ -237,13 +253,10 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
         //직선의 경우.
         return Vector2.Lerp(p0.point, p1.point, t);
     }
-    public Vector2 EvaluatePoint(int index, float t)
+    Vector2 EvaluatePoint(int index, float t)
     {
         return EvaluatePoint(points[index], points[index + 1], t);
     }
-    /// <summary>
-    /// 의미가 있을지 모르겠지만 기울기임 ㅋ
-    /// </summary>
     Vector2 GetDerivative(LinePoint p0, LinePoint p1, float t)
     {
         if(p0.isNextCurve || p1.isPrvCurve)
@@ -256,9 +269,37 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
         }
         return (p1.point - p0.point).normalized;
     }
+    bool CheckLength(float currentLength)
+    {
+        return currentLength / lineLength > lengthRatio;
+    }
+    float GetLength(int index)
+    {
+        if(index <= 0)
+        {
+            return 0f;
+        }
+        float sum = 0f;
+        for (int n = 0; n < index; n++)
+        {
+            sum += Vector2.Distance(points[n].point, points[n + 1].point);
+        }
+        return sum;
+    }
+  
+    //public function
+    public Vector2 GetPoint(int index, int curveIndex)
+    {
+        if(curveIndex >= divideCount)
+        {
+            throw new System.Exception("index Error index : "+ curveIndex+" maxValue : "+divideCount);
+        }
+
+        return transform.TransformPoint( EvaluatePoint(points[index], points[index + 1], 1f / divideCount * curveIndex));
+    }
     public bool IsCurve(int index)
     {
-        if (points.Count - 1 <= index)
+        if (points.Count -1 <= index)
         {
             throw new System.Exception("인덱스가 작음 index:" + index);
         }
@@ -267,18 +308,11 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
 
         return false;
     }
-      
-    public float LengthRatio(int i)
-    {
-        float sum = 0f;
-        for (int n = 0; n < i; n++)
-        {
-            sum += Vector2.Distance(points[n].point, points[n + 1].point);
-        }
-        return sum / lineLength;
-    }
-
-    public void DrawRoundRdge(VertexHelper vh, Vector2 p0, Vector2 p1, Color color)
+    /// <summary>
+    /// 해당 index가 차지하고 있는 
+    /// length 비율
+    /// </summary>
+    public void DrawRoundEdge(VertexHelper vh, Vector2 p0, Vector2 p1, Color color)
     {
         Vector2 widthVector = Vector3.Cross(p0 - p1, new Vector3(0, 0, 1));
         widthVector.Normalize();
@@ -299,5 +333,4 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
         }
 
     }
-
 }

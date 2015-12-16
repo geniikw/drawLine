@@ -16,22 +16,18 @@ public class UIMeshLineEditor : Editor {
     void DrawLineInScene()
     {
         Handles.color = Color.white;
-        Transform ownerTrans = owner.transform;
-
-        for (int n = 0; n < owner.points.Count - 1; n++)
+        for (int n = 0; n < owner.points.Count-1; n++)
         {
             if (owner.IsCurve(n))
             {
-                float divide = owner.divideCount;
-
-                for (float i = 0; i < divide; i++)
+                for (int i = 0; i < owner.divideCount-1 ; i++)
                 {
-                    Handles.DrawLine(ownerTrans.TransformPoint(owner.EvaluatePoint(n, 1f / divide * i)), ownerTrans.TransformPoint(owner.EvaluatePoint(n, 1f / divide * (i + 1f))));
+                    Handles.DrawLine(owner.GetPoint(n, i), owner.GetPoint(n, i+1));
                 }
             }
             else
             {
-                Handles.DrawLine(ownerTrans.TransformPoint(owner.points[n].point), ownerTrans.TransformPoint(owner.points[n + 1].point));
+                Handles.DrawLine(owner.GetPoint(n, 0), owner.GetPoint(n + 1, 0));
             }
         }
     }

@@ -97,5 +97,4 @@ public class UIPolygon : MaskableGraphic, IMeshModifier
             return color;
         }
     }
-
 }
