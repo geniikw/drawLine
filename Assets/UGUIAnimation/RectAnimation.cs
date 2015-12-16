@@ -11,9 +11,7 @@ using UnityEngine.UI;
 public class RectAnimation : ParentAnimation
 {
     public RectTransform rectTransform { get { return GetComponent<RectTransform>(); } }
-   
-    public AnimationCurve curve = AnimationCurve.Linear(0, 0, 1, 1);
-
+  
     public Vector2 vectorPosition = Vector2.zero;
     
     [Header("일단 0~180 사이를 넣도록 하자")][Tooltip("clamp(0~180) 되는 문제와 360가 넘어갔을때를 구현하지 못함")]
@@ -32,7 +30,6 @@ public class RectAnimation : ParentAnimation
 
         Vector2 startPosition = rectTransform.anchoredPosition;
         Vector2 endPosition = startPosition + vectorPosition;
-
         Quaternion startQuaternion = rectTransform.localRotation;
         Quaternion endQuaternion = startQuaternion * Quaternion.Euler(eulerAngle);
 
@@ -42,7 +39,6 @@ public class RectAnimation : ParentAnimation
             float curveTime = curve.Evaluate(t);
 
             rectTransform.anchoredPosition = startPosition * (1f - curveTime) + endPosition * curveTime;
-
             rectTransform.localRotation = Quaternion.Lerp(startQuaternion, endQuaternion, curve.Evaluate(t));
             rectTransform.localScale = startScale * (1f - curveTime) + targetScale * curveTime;
 

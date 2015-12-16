@@ -33,8 +33,15 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
     }
     public bool roundEdge = false;
     public int roundEdgePolygonCount = 5;
-    [Range(0, 1)][Header("0일땐 안그림 1일때 전부그림")]
-    public float lengthRatio = 1f;
+    [Range(0, 1)][Header("0일땐 안그림 1일때 전부그림")][SerializeField]
+    float m_lengthRatio = 1f;
+    public float lengthRatio { get{ return m_lengthRatio; }
+        set
+        {
+            m_lengthRatio = value;
+            UpdateGeometry();
+        }
+    }
     
     /// UI Interface
     public void ModifyMesh(VertexHelper vh)
@@ -95,10 +102,10 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
                 ///check final
                 float length = GetLength(index + 1);
                 bool isFinal = false;
-                if (currentRatio > lengthRatio)
+                if (currentRatio > m_lengthRatio)
                 {
                     currentRatio -= deltaRatio;
-                    float targetlength = lineLength * lengthRatio;
+                    float targetlength = lineLength * m_lengthRatio;
                     Vector3 lineVector = p1 - p0;
                     p1 = p0 + lineVector.normalized * (targetlength - lineLength * currentRatio);
                     isFinal = true;
@@ -142,7 +149,7 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
             bool isFinal = false;
             if (CheckLength(length))
             {
-                float targetlength = lineLength * lengthRatio;
+                float targetlength = lineLength * m_lengthRatio;
                 Vector3 lineVector = p1 - p0;
                 p1 = p0 + lineVector.normalized * (targetlength - GetLength(index));
                 isFinal = true;
@@ -287,7 +294,7 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
     }
     bool CheckLength(float currentLength)
     {
-        return currentLength / lineLength > lengthRatio;
+        return currentLength / lineLength > m_lengthRatio;
     }
     float GetLength(int index)
     {

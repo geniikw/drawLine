@@ -7,7 +7,11 @@ public class UIMeshLineEditor : Editor {
     
     UIMeshLine m_UIMeshLine;
     UIMeshLine owner { get { return m_UIMeshLine ?? (m_UIMeshLine = target as UIMeshLine);} }
- 
+
+    public override void OnInspectorGUI()
+    {
+        base.OnInspectorGUI();
+    }
     void OnSceneGUI()
     {
         HandlesForPoints();
@@ -71,5 +75,4 @@ public class UIMeshLineEditor : Editor {
         }
 
     }
-
 }

@@ -7,18 +7,20 @@ public abstract class ParentAnimation : MonoBehaviour {
     public float waitTime = 0f;
     public ParentAnimation next= null;
     public float time = 1f;
-
+    public AnimationCurve curve = AnimationCurve.Linear(0, 0, 1, 1);
     public bool isPlayAtStart = false;
-
 
     void Start()
     {
+        Init();
         if (isPlayAtStart)
         {
             StartCoroutine(Play());
         }
     }
 
+    public virtual void Init() { }
+ 
     public IEnumerator Play()
     {
         yield return StartCoroutine(Wait());
@@ -33,8 +35,17 @@ public abstract class ParentAnimation : MonoBehaviour {
     {
         yield return StartCoroutine(next.Play());
     }
-    protected abstract IEnumerator PlayAnimation();
-
+    protected virtual IEnumerator PlayAnimation()
+    {
+        float t = 0f;
+        
+        while (t < 1f)
+        {
+            t += Time.deltaTime;
+            float curveTime = curve.Evaluate(t);
+            yield return null;
+        }
+    }
     IEnumerator Wait()
     {
         float t = 0f;
