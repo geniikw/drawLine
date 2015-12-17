@@ -3,25 +3,23 @@ using System.Collections;
 using System;
 
 [RequireComponent(typeof(CanvasRenderer))]
-public class ColorAnimation : ParentAnimation {
+public class ColorAnimation : ParentAnimation
+{
 
     CanvasRenderer m_cr;
     CanvasRenderer canvasRenderer { get { return m_cr ?? (m_cr = GetComponent<CanvasRenderer>()); } }
     public Color target;
-    
+    Color start;
 
-    protected override IEnumerator PlayAnimation()
+
+
+    protected override void Setup()
     {
-        Color startbuffer = canvasRenderer.GetColor();
-        float t = 0f;
-        while(t < 1f)
-        {
-            canvasRenderer.SetColor(Color.Lerp(startbuffer, target, t));
-                        
-            t += Time.deltaTime/time;
-            yield return null;
-        }
-
-
+        start = canvasRenderer.GetColor();
+    }
+    protected override void Lerp(float t)
+    {
+        canvasRenderer.SetColor(Color.Lerp(start, target, t));
     }
 }
+

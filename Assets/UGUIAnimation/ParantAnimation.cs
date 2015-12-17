@@ -35,14 +35,19 @@ public abstract class ParentAnimation : MonoBehaviour {
     {
         yield return StartCoroutine(next.Play());
     }
+
+    protected virtual void Setup() { }
+    protected virtual void Lerp(float t) { }
+
     protected virtual IEnumerator PlayAnimation()
     {
         float t = 0f;
-        
+        Setup();
         while (t < 1f)
         {
-            t += Time.deltaTime;
+            t += Time.deltaTime/time;
             float curveTime = curve.Evaluate(t);
+            Lerp(curveTime);
             yield return null;
         }
     }

@@ -115,7 +115,7 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
                 {
                     DrawRoundEdge(vh, p0, p1, c0);
                 }
-                if (roundEdge && index == points.Count - 2 && n == divideCount - 1 || isFinal)
+                if (roundEdge && (index == points.Count - 2 && n == divideCount - 1 || isFinal))
                 {
                     DrawRoundEdge(vh, p1, p0, c1);
                 }
@@ -159,7 +159,7 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
             {
                 DrawRoundEdge(vh, p0, p1, c0);
             }
-            if (roundEdge && index == points.Count - 2 || isFinal)
+            if (roundEdge && (index == points.Count - 2 || isFinal))
             {
                 DrawRoundEdge(vh, p1, p0, c1);
             }
@@ -324,7 +324,7 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
     {
         if (points.Count -1 <= index)
         {
-            throw new System.Exception("인덱스가 작음 index:" + index);
+            throw new System.Exception("인덱스가 작음 index:" + index+ " maxValue : "+(points.Count-1));
         }
         if (points[index].isNextCurve || points[index + 1].isPrvCurve)
             return true;
@@ -354,6 +354,5 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
             vh.AddVert(p0 + Mathf.Cos(angleUnit * n) * widthVector + Mathf.Sin(angleUnit * n) * lineVector, color, Vector2.zero);
             vh.AddTriangle(current, current + 1 + n, current + 2 + n);
         }
-
     }
 }
