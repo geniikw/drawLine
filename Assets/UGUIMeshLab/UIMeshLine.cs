@@ -100,7 +100,7 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
                 Color c1 = useGradient ? gradient.Evaluate(currentRatio) : color;
 
                 ///check final
-                float length = GetLength(index + 1);
+                //float length = GetLength(index + 1);
                 bool isFinal = false;
                 if (currentRatio > m_lengthRatio)
                 {
