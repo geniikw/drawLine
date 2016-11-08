@@ -6,10 +6,19 @@ using System.Collections.Generic;
 
 public class UIMeshLine : MaskableGraphic, IMeshModifier
 {
-    //todo : make UIMeshLine
+    public List<LinePoint> points { 
+        get
+        {
+            SetVerticesDirty();
+            return m_points;
+        }
+    }
 
-    public List<LinePoint> points = new List<LinePoint>();
-    public float width = 10f;
+    [SerializeField]
+    List<LinePoint> m_points = new List<LinePoint>();
+
+    [SerializeField]
+    float m_width = 10f;
 
     [Range(1,100)]
     public int divideCount = 10;
@@ -24,13 +33,14 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
         get
         {
             float sum = 0f;
-            for (int n = 0; n < points.Count - 1; n++)
+            for (int n = 0; n < m_points.Count - 1; n++)
             {
-                sum += Vector2.Distance(points[n].point, points[n + 1].point);
+                sum += Vector2.Distance(m_points[n].point, m_points[n + 1].point);
             }
             return sum;
         }
     }
+
     public bool roundEdge = false;
     public int roundEdgePolygonCount = 5;
     [Range(0, 1)][Header("0일땐 안그림 1일때 전부그림")][SerializeField]
@@ -62,7 +72,7 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
     {
         vh.Clear();
         UIVertex[] prvVert = null;
-        for (int n  = 0; n < points.Count-1; n++)
+        for (int n  = 0; n < m_points.Count-1; n++)
         {
             if (CheckLength(GetLength(n)))
             {
@@ -115,7 +125,7 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
                 {
                     DrawRoundEdge(vh, p0, p1, c0);
                 }
-                if (roundEdge && (index == points.Count - 2 && n == divideCount - 1 || isFinal))
+                if (roundEdge && (index == m_points.Count - 2 && n == divideCount - 1 || isFinal))
                 {
                     DrawRoundEdge(vh, p1, p0, c1);
                 }
@@ -138,8 +148,8 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
         }
         else
         {
-            Vector3 p0 = points[index].point;
-            Vector3 p1 = points[index + 1].point;
+            Vector3 p0 = m_points[index].point;
+            Vector3 p1 = m_points[index + 1].point;
 
             Color c0 = useGradient ? gradient.Evaluate(ratio) : color;
             Color c1 = useGradient ? gradient.Evaluate(ratioEnd) : color;
@@ -159,7 +169,7 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
             {
                 DrawRoundEdge(vh, p0, p1, c0);
             }
-            if (roundEdge && (index == points.Count - 2 || isFinal))
+            if (roundEdge && (index == m_points.Count - 2 || isFinal))
             {
                 DrawRoundEdge(vh, p1, p0, c1);
             }
@@ -200,7 +210,7 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
             p1 = prvLineVert[0].position;
         }
 
-        Vector3 cp0 = (p0 + p1- center*2).normalized * width *0.5f + center;
+        Vector3 cp0 = (p0 + p1- center*2).normalized * m_width *0.5f + center;
 
         float angle = Vector3.Angle(p0 - center, p1 - center);
 
@@ -242,13 +252,13 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
         }
         else
         {
-            verts[0].position = p0 + widthVector * width * 0.5f;
-            verts[1].position = p0 - widthVector * width * 0.5f;
+            verts[0].position = p0 + widthVector * m_width * 0.5f;
+            verts[1].position = p0 - widthVector * m_width * 0.5f;
         }
         verts[0].uv0 = new Vector2(0, 0);
         verts[1].uv0 = new Vector2(1, 0);
-        verts[2].position = p1 - widthVector * width * 0.5f; verts[2].uv0 = new Vector2(1, 1);
-        verts[3].position = p1 + widthVector * width * 0.5f; verts[3].uv0 = new Vector2(0, 1);
+        verts[2].position = p1 - widthVector * m_width * 0.5f; verts[2].uv0 = new Vector2(1, 1);
+        verts[3].position = p1 + widthVector * m_width * 0.5f; verts[3].uv0 = new Vector2(0, 1);
 
         verts[0].color = c0;
         verts[1].color = c0;
@@ -278,7 +288,7 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
     }
     Vector2 EvaluatePoint(int index, float t)
     {
-        return EvaluatePoint(points[index], points[index + 1], t);
+        return EvaluatePoint(m_points[index], m_points[index + 1], t);
     }
     Vector2 GetDerivative(LinePoint p0, LinePoint p1, float t)
     {
@@ -305,7 +315,7 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
         float sum = 0f;
         for (int n = 0; n < index; n++)
         {
-            sum += Vector2.Distance(points[n].point, points[n + 1].point);
+            sum += Vector2.Distance(m_points[n].point, m_points[n + 1].point);
         }
         return sum;
     }
@@ -318,29 +328,26 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
             throw new System.Exception("index Error index : "+ curveIndex+" maxValue : "+divideCount);
         }
 
-        return transform.TransformPoint( EvaluatePoint(points[index], points[index + 1], 1f / divideCount * curveIndex));
+        return transform.TransformPoint( EvaluatePoint(m_points[index], m_points[index + 1], 1f / divideCount * curveIndex));
     }
     public bool IsCurve(int index)
     {
-        if (points.Count -1 <= index)
+        if (m_points.Count -1 <= index)
         {
-            throw new System.Exception("인덱스가 작음 index:" + index+ " maxValue : "+(points.Count-1));
+            throw new System.Exception("인덱스가 작음 index:" + index+ " maxValue : "+(m_points.Count-1));
         }
-        if (points[index].isNextCurve || points[index + 1].isPrvCurve)
+        if (m_points[index].isNextCurve || m_points[index + 1].isPrvCurve)
             return true;
 
         return false;
     }
-    /// <summary>
-    /// 해당 index가 차지하고 있는 
-    /// length 비율
-    /// </summary>
+
     public void DrawRoundEdge(VertexHelper vh, Vector2 p0, Vector2 p1, Color color)
     {
         Vector2 widthVector = Vector3.Cross(p0 - p1, new Vector3(0, 0, 1));
         widthVector.Normalize();
-        widthVector = widthVector * width / 2f;
-        Vector2 lineVector = (p0 - p1).normalized * width / 2f;
+        widthVector = widthVector * m_width / 2f;
+        Vector2 lineVector = (p0 - p1).normalized * m_width / 2f;
 
         int count = roundEdgePolygonCount;
         int current = vh.currentVertCount;

@@ -8,9 +8,9 @@ using System.Collections;
 public class LinePoint
 {
     public Vector2 point;
-    public bool isNextCurve = false;
+    public bool isNextCurve;
     public Vector2 nextCurveOffset;
-    public bool isPrvCurve = false;
+    public bool isPrvCurve;
     public Vector2 prvCurveOffset;
 
     //todo(solved) : CurvePoint가 Offset값으로 넣엇는데 지금은 좌표로 적용되어 있음.
@@ -21,7 +21,7 @@ public class LinePoint
     /// <summary>
     /// 이 값은 에디팅에만 필요하고 게임에는 필요 없지만 방법이 없어서 그냥 넣어둠...
     /// </summary>
-    public bool isFold = false;
+    public bool isFold;
 #endif
 }
 

@@ -60,15 +60,20 @@ public class UIMeshLineEditor : Editor {
             if (EditorGUI.EndChangeCheck())
             {
                 Undo.RecordObject(owner, "point move");
-                owner.points[n].point = ownerTrans.InverseTransformPoint(point);
+
+                var buf = owner.points[n];
+                buf.point = ownerTrans.InverseTransformPoint(point);
+                
                 if (owner.points[n].isNextCurve)
                 {
-                    owner.points[n].nextCurvePoint = ownerTrans.InverseTransformPoint(cp0);
+                    buf.nextCurvePoint = ownerTrans.InverseTransformPoint(cp0);
                 }
                 if (owner.points[n].isPrvCurve)
                 {
-                    owner.points[n].prvCurvePoint = ownerTrans.InverseTransformPoint(cp1);
+                    buf.prvCurvePoint = ownerTrans.InverseTransformPoint(cp1);
                 }
+
+                owner.points[n] = buf;
                 EditorUtility.SetDirty(owner);
                 owner.SetAllDirty();
             }
