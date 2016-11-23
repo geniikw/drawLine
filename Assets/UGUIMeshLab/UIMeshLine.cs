@@ -12,6 +12,11 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
             SetVerticesDirty();
             return m_points;
         }
+        set
+        {
+            m_points = value;
+        }
+
     }
 
     [SerializeField]

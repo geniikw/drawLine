@@ -16,6 +16,8 @@ public class DragUICompont : MonoBehaviour, IDragHandler
 
     public void OnDrag(PointerEventData eventData)
     {
-        var pos = m_line.points[0].point = eventData.position;
+        var pos = m_line.points[0];
+        pos.point = eventData.position;
+        m_line.points[0] = pos;
     }
 }
