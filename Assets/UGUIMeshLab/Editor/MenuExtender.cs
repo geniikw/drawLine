@@ -16,10 +16,10 @@ namespace UGUIAnimation
             LinePoint pointInfo = new LinePoint();
             pointInfo.point = new Vector2(-50, 0);
 
-            line.points.Add(pointInfo);
+            line.AddPoint(pointInfo);
 
             pointInfo.point = new Vector2(50, 0);
-            line.points.Add(pointInfo);
+            line.AddPoint(pointInfo);
             
             go.name = "MeshLine";
 

@@ -9,8 +9,8 @@ public class AddPoint : MonoBehaviour {
         int x = 0;
         while (true)
         {
-            GetComponent<UIMeshLine>().points.Add(new LinePoint(new Vector2(x++*10,0)));
-
+            var line = GetComponent<UIMeshLine>();
+            line.AddPoint(new LinePoint(new Vector2(x++ * 10, 0)));
             yield return new WaitForSeconds(1);
         }
 	}

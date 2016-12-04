@@ -14,10 +14,11 @@ public class LinePointDrawer : PropertyDrawer {
     {
         int indent = EditorGUI.indentLevel;
         EditorGUI.indentLevel = 1;
-                
+        
         property.FindPropertyRelative("isFold").boolValue = EditorGUI.Foldout(new Rect(position.x, position.y, position.width, 16), property.FindPropertyRelative("isFold").boolValue, label, true);
         if (!property.FindPropertyRelative("isFold").boolValue)
         {
+
             var next = property.FindPropertyRelative("isNextCurve").boolValue;
             var prv = property.FindPropertyRelative("isPrvCurve").boolValue;
             
@@ -25,15 +26,22 @@ public class LinePointDrawer : PropertyDrawer {
             var positionPrvBool = new Rect(position.x + 10, position.y + 16, 30f, 16f);
             var positionNextBool = new Rect(position.x + 215, position.y + 16, 30f, 16f);
 
+            var positionDivideCount = positionRect;
+            positionDivideCount.y += 16;
+            
+
             if (next)
             {
                 positionNextBool.y += 16;
+                positionDivideCount.y += 16;
             }
             if (prv)
             {
                 positionRect.y += 16;
                 positionNextBool.y += 16;
+                positionDivideCount.y += 16;
             }
+            EditorGUI.PropertyField(positionDivideCount, property.FindPropertyRelative("divideCount"));
             
             EditorGUI.BeginProperty(position, label, property);
 
@@ -67,6 +75,7 @@ public class LinePointDrawer : PropertyDrawer {
                 property.FindPropertyRelative("prvCurveOffset").vector2Value = Vector2.zero;
             }
 
+
             EditorGUI.EndProperty();
         }
 
@@ -77,7 +86,7 @@ public class LinePointDrawer : PropertyDrawer {
         if (property.FindPropertyRelative("isFold").boolValue)
             return base.GetPropertyHeight(property, label);
 
-        float propertyHeight = 16f;
+        float propertyHeight = 32f;
         if (property.FindPropertyRelative("isNextCurve").boolValue)
         {
             propertyHeight += 16f;

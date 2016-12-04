@@ -13,9 +13,13 @@ public struct LinePoint
     public bool isPrvCurve;
     public Vector2 prvCurveOffset;
 
-    //todo(solved) : CurvePoint가 Offset값으로 넣엇는데 지금은 좌표로 적용되어 있음.
-    public Vector2 nextCurvePoint { get { return nextCurveOffset + point; } set{ nextCurveOffset = value - point; } }
+    public Vector2 nextCurvePoint {
+        get
+        { return nextCurveOffset + point; }
+        set { nextCurveOffset = value - point; } }
     public Vector2 prvCurvePoint {  get { return prvCurveOffset + point; } set { prvCurveOffset = value - point; } }
+    [Range(1,100)]
+    public int divideCount;
 
     public LinePoint(Vector3 p)
     {
@@ -25,6 +29,7 @@ public struct LinePoint
         nextCurveOffset = Vector3.zero;
         prvCurveOffset = Vector3.zero;
         isFold = false;
+        divideCount = 0;
     }
 
 #if UNITY_EDITOR

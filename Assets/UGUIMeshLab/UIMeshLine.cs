@@ -3,22 +3,10 @@ using System.Collections;
 
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System;
 
-public class UIMeshLine : MaskableGraphic, IMeshModifier
+public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter, ISerializationCallbackReceiver
 {
-    public List<LinePoint> points { 
-        get
-        {
-            SetVerticesDirty();
-            return m_points;
-        }
-        set
-        {
-            m_points = value;
-        }
-
-    }
-
     [SerializeField]
     List<LinePoint> m_points = new List<LinePoint>();
 
@@ -26,7 +14,6 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
     float m_width = 10f;
 
     [Range(1,100)]
-    public int divideCount = 10;
     public bool useGradient = false;
     public Gradient gradient;
 
@@ -71,7 +58,7 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
             vh.FillMesh(mesh);
         }
     }
-    
+   
     /// private function
     void EditMesh(VertexHelper vh)
     {
@@ -97,6 +84,8 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
         {
             float curveLength = 0f;
             float currentRatio = ratio;
+            var divideCount = m_points[index].divideCount;
+
             for (int n = 0; n < divideCount; n++)
             {
                 Vector3 p0 = EvaluatePoint(index, 1f / divideCount * n);
@@ -324,16 +313,44 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
         }
         return sum;
     }
-  
+
     //public function
-    public Vector2 GetPoint(int index, int curveIndex)
+    public LinePoint GetPointInfo(int index)
     {
-        if(curveIndex >= divideCount)
+        return m_points[index];
+    }
+    public void SetPointInfo(int index, LinePoint data)
+    {
+        m_points[index] = data;
+        SetVerticesDirty();
+    }
+    public void SetPointPosition(int index, Vector2 position)
+    {
+        var info = m_points[index];
+        info.point = position;
+        m_points[index] = info;
+        
+        SetVerticesDirty();
+    }
+
+    public void AddPoint(LinePoint data)
+    {
+        m_points.Add(data);
+        SetVerticesDirty();
+    }
+    public int GetPointCount()
+    {
+        return m_points.Count;
+    }
+
+    public Vector2 GetCurvePosition(int index, int curveIndex)
+    {
+        if(curveIndex >= m_points[index].divideCount)
         {
-            throw new System.Exception("index Error index : "+ curveIndex+" maxValue : "+divideCount);
+            throw new System.Exception("index Error index : "+ curveIndex+" maxValue : "+ m_points[index].divideCount);
         }
 
-        return transform.TransformPoint( EvaluatePoint(m_points[index], m_points[index + 1], 1f / divideCount * curveIndex));
+        return transform.TransformPoint( EvaluatePoint(m_points[index], m_points[index + 1], 1f / m_points[index].divideCount * curveIndex));
     }
     public bool IsCurve(int index)
     {
@@ -366,5 +383,20 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier
             vh.AddVert(p0 + Mathf.Cos(angleUnit * n) * widthVector + Mathf.Sin(angleUnit * n) * lineVector, color, Vector2.zero);
             vh.AddTriangle(current, current + 1 + n, current + 2 + n);
         }
+    }
+
+    void ISerializationCallbackReceiver.OnBeforeSerialize()
+    {
+        
+    }
+    void ISerializationCallbackReceiver.OnAfterDeserialize()
+    {
+        //Debug.Log("a");
+    }
+
+    bool ICanvasRaycastFilter.IsRaycastLocationValid(Vector2 sp, Camera eventCamera)
+    {
+        
+        return true;
     }
 }
