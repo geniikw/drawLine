@@ -16,6 +16,8 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
     [SerializeField]
     float m_width = 10f;
 
+    public bool useRayCastFilter = false;
+
     public bool useGradient = false;
     public Gradient gradient;
 
@@ -391,10 +393,12 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
     // raycast filter interface.
     bool ICanvasRaycastFilter.IsRaycastLocationValid(Vector2 sp, Camera eventCamera)
     {
+        if (!useRayCastFilter)
+            return true;
         //ref : https://msdn.microsoft.com/en-us/library/ms969920.aspx?f=255&MSPPError=-2147217396
         //my god...
         //caoution : this code run each frame at pointer on rect area.
-        for(int n =0;n< GetPointCount()-1; n++)
+        for (int n =0;n< GetPointCount()-1; n++)
         {
             //Debug.Log(n + "point");
             if (CheckPointOnLine(GetPointInfo(n), GetPointInfo(n+1),sp))
