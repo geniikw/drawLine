@@ -12,11 +12,9 @@ public class DragUICompont : MonoBehaviour, IDragHandler
     {
         m_line = GetComponent<UIMeshLine>();
     }
-
-
+    
     public void OnDrag(PointerEventData eventData)
     {
         m_line.SetPointPosition(0, eventData.position);
-
     }
 }

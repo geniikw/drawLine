@@ -29,7 +29,7 @@ public struct LinePoint
         nextCurveOffset = Vector3.zero;
         prvCurveOffset = Vector3.zero;
         isFold = false;
-        divideCount = 0;
+        divideCount = 1;
     }
 
 #if UNITY_EDITOR

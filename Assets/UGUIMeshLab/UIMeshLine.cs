@@ -5,7 +5,10 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using System;
 
-public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter, ISerializationCallbackReceiver
+//When I wrote this, only God and I understood what I was doing
+//Now, God only knows  - someone in stack overflow -.
+
+public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
 {
     [SerializeField]
     List<LinePoint> m_points = new List<LinePoint>();
@@ -13,7 +16,6 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter, 
     [SerializeField]
     float m_width = 10f;
 
-    [Range(1,100)]
     public bool useGradient = false;
     public Gradient gradient;
 
@@ -347,7 +349,7 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter, 
     {
         if(curveIndex >= m_points[index].divideCount)
         {
-            throw new System.Exception("index Error index : "+ curveIndex+" maxValue : "+ m_points[index].divideCount);
+            throw new Exception("index Error index : "+ curveIndex+" maxValue : "+ m_points[index].divideCount);
         }
 
         return transform.TransformPoint( EvaluatePoint(m_points[index], m_points[index + 1], 1f / m_points[index].divideCount * curveIndex));
@@ -385,18 +387,65 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter, 
         }
     }
 
-    void ISerializationCallbackReceiver.OnBeforeSerialize()
-    {
-        
-    }
-    void ISerializationCallbackReceiver.OnAfterDeserialize()
-    {
-        //Debug.Log("a");
-    }
 
+    // raycast filter interface.
     bool ICanvasRaycastFilter.IsRaycastLocationValid(Vector2 sp, Camera eventCamera)
     {
+        //ref : https://msdn.microsoft.com/en-us/library/ms969920.aspx?f=255&MSPPError=-2147217396
+        //my god...
+        //caoution : this code run each frame at pointer on rect area.
+        for(int n =0;n< GetPointCount()-1; n++)
+        {
+            //Debug.Log(n + "point");
+            if (CheckPointOnLine(GetPointInfo(n), GetPointInfo(n+1),sp))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private bool CheckPointOnLine(LinePoint linePoint1, LinePoint linePoint2, Vector2 sp)
+    {
+        if(!linePoint1.isNextCurve && !linePoint2.isPrvCurve)
+        {
+            var p1 = transform.TransformPoint(linePoint1.point);
+            var p2 = transform.TransformPoint(linePoint2.point);
+
+            return CheckPointOnStraightLine(p1, p2, sp);
+        }
         
-        return true;
+        return false;
+    }
+
+
+    private bool CheckPointOnStraightLine(Vector3 p0, Vector3 p1, Vector3 sp)
+    {
+        var v0 = p1 - p0;
+        var v1 = sp - p0;
+        
+        var projectionVector = Vector3.Project(v1, v0);
+
+        if (projectionVector.normalized!=v0.normalized || projectionVector.magnitude > v0.magnitude)
+            return false;
+
+        var dist = Vector2.Distance(p0+projectionVector, sp);
+
+        if (dist < m_width / 2f)
+            return true;
+
+        return false;
+    }
+    //for debug.
+    void OnDrawGizmos()
+    {
+        if (false)
+        {
+            var buffer = Gizmos.color;
+
+
+
+            Gizmos.color = buffer;
+        }
     }
 }
