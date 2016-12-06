@@ -4,6 +4,7 @@ using System.Collections;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System;
+using System.Linq;
 
 //When I wrote this, only God and I understood what I was doing
 //Now, God only knows  - someone in stack overflow -.
@@ -395,9 +396,14 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
     {
         if (!useRayCastFilter)
             return true;
-        //ref : https://msdn.microsoft.com/en-us/library/ms969920.aspx?f=255&MSPPError=-2147217396
-        //my god...
-        //caoution : this code run each frame at pointer on rect area.
+
+        if (GetComponentInParent<Canvas>().renderMode != RenderMode.ScreenSpaceOverlay)
+        {
+            Debug.LogWarning("this filter only implement at overlaymode.");
+            return true;
+        }
+
+
         for (int n =0;n< GetPointCount()-1; n++)
         {
             //Debug.Log(n + "point");
@@ -411,18 +417,148 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
 
     private bool CheckPointOnLine(LinePoint linePoint1, LinePoint linePoint2, Vector2 sp)
     {
-        if(!linePoint1.isNextCurve && !linePoint2.isPrvCurve)
-        {
-            var p1 = transform.TransformPoint(linePoint1.point);
-            var p2 = transform.TransformPoint(linePoint2.point);
+        var p0 = transform.TransformPoint(linePoint1.point);
+        var p1 = transform.TransformPoint(linePoint2.point);
 
-            return CheckPointOnStraightLine(p1, p2, sp);
+        var c0 = transform.TransformPoint(linePoint1.nextCurvePoint);
+        var c1 = transform.TransformPoint(linePoint2.prvCurvePoint);
+
+        if (!linePoint1.isNextCurve && !linePoint2.isPrvCurve)
+        {
+            return CheckPointOnStraightLine(p0, p1, sp);
+        }
+        else
+        {
+            return CheckPointOnBezierCurve(p0, c0, c1, p1, sp);
+        }
+    }
+    
+    private bool CheckPointOnBezierCurve(Vector3 p0, Vector3 c0, Vector3 c1, Vector3 p1, Vector2 sp)
+    {
+        // % int
+        // # double
+        var t = CalculateMinT(p0, c0, c1, p1, sp);
+        
+        if(Vector3.Distance(sp, Curve.CalculateBezier(p0, p1, c0, c1, t))< m_width / 2f)
+        {
+            return true;
         }
         
+        /* unityeditor function.
+        Debug.LogWarning("can't build because UnityEditor...-_-;");
+        dist = UnityEditor.HandleUtility.DistancePointBezier(sp, p0, p1, c0, c1);
+        */
         return false;
     }
+    private float CalculateMinT(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, Vector3 sp)
+    {
+        float mint = 0.5f;
+        float currentLength = float.MaxValue;
+        //float currentDot = float.MaxValue;
 
+        for(float f = 0f; f< 1f; f+= 0.02f)
+        {
+            var p = Curve.CalculateBezier(p0, p3, p1, p2, f);
+            var l = (p.x - sp.x) * (p.x - sp.x) + (p.y - sp.y) * (p.y - sp.y);
+            // Debug.Log(f + " ===> " + l);
+            if (l < currentLength)
+            {
+                // Debug.Log("!!!!!!!!!hit!!!!!!!!");
+                //var d = Curve.CalculateBezierDerivative(p0, p1, p2, p3, f);
+                currentLength = l;
+                mint = f;
+            }              
+        }
+                      
+        return mint;
+    }
 
+    /*http://www.tinaja.com/glib/bezdist.pdf doesn't work;
+    private float CalculateMinT(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, Vector3 sp) 
+    {
+
+        float z1 =float.MaxValue, s1=100f, t1=0f;
+        float z2, s2, t2;
+
+        float stepSize = 0.02f;
+
+        var t = 0f;
+        while(t < 1f)
+        {
+            float zbuffer;
+            float sbuffer;
+            Bezier(p0, p1, p2, p3, sp, t,out sbuffer,out zbuffer);
+
+            if(sbuffer == 0)
+            {
+                z1 = zbuffer;
+                s1 = sbuffer;
+                t1 = t;
+                break;
+            }
+
+            if ( t == 0f )
+            {
+                z1 = zbuffer;
+                s1 = sbuffer;
+                t1 = t;
+            }
+
+            if(sbuffer < s1)
+            {
+                z1 = zbuffer;
+                s1 = sbuffer;
+                t1 = t;
+            }
+            t += stepSize;
+        }
+        var results = 0f;
+        if( s1 != 0f)
+        {
+            t2 = Mathf.Min(0f, t1 + stepSize);
+            Bezier(p0, p1, p2, p3, sp, t2, out s2, out z2);
+            if(z1 != z2)
+            {
+                results=(z2 * t1 - z1 * t2) / (z2 - z1);          
+            }
+            else
+            {
+                results=(t1 + t2) / 2f;
+            }
+        }
+        else
+        {
+            results= t1;
+        }
+        return Mathf.Clamp01(results);
+
+    }   
+    private void Bezier(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, Vector3 sp, float t, out float s, out float z)
+    {
+        var a3 = (p3.x - p0.x + 3f * (p1.x - p2.x)) / 8f;
+        var b3 = (p3.y - p0.y + 3f * (p1.y - p2.y)) / 8f;
+
+        var a2 = (p3.x + p0.x - p1.x - p2.x) * 3f / 8f;
+        var b2 = (p3.y + p0.y - p1.y - p2.y) * 3f / 8f;
+
+        var a1 = (p3.x - p0.x) / 2f - a3;
+        var b1 = (p3.y - p0.y) / 2f - b3;
+
+        var a0 = (p3.x + p0.x) / 2f - a2;
+        var b0 = (p3.y + p0.y) / 2f - b2;
+
+        var x = a0 + t * (a1 + t * (a2 + t * a3));
+        var y = b0 + t * (b1 + t * (b2 + t * b3));
+        var dx4 = x - sp.x;
+        var dy4 = y - sp.y;
+        var dx = a1 + t * (2f * a2 + t * 3f * a3);
+        var dy = b1 + t * (2f * b2 + t * 3f * b3);
+
+        z = dx * dx4 + dy * dy4;
+        s = dx4 * dx4 + dy4 * dy4;
+    }
+    doesn't work*/
+    
     private bool CheckPointOnStraightLine(Vector3 p0, Vector3 p1, Vector3 sp)
     {
         var v0 = p1 - p0;
@@ -430,26 +566,36 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
         
         var projectionVector = Vector3.Project(v1, v0);
 
-        if (projectionVector.normalized!=v0.normalized || projectionVector.magnitude > v0.magnitude)
+        if (projectionVector.normalized != v0.normalized || projectionVector.magnitude > v0.magnitude)
             return false;
 
-        var dist = Vector2.Distance(p0+projectionVector, sp);
+        var dist = Vector3.Distance(p0 + projectionVector, sp);
 
         if (dist < m_width / 2f)
             return true;
 
-        return false;
+        return false; 
     }
-    //for debug.
+    
+    /*debug
     void OnDrawGizmos()
     {
-        if (false)
-        {
-            var buffer = Gizmos.color;
-
-
-
-            Gizmos.color = buffer;
-        }
+        DrawCubeWrap(DebugPosition1, Color.red ,Vector3.one * 3f);
+        DrawCubeWrap(DebugPosition2, Color.red, Vector3.one * 3f);
+        DrawCubeWrap(DebugPosition3, Color.red, Vector3.one * 3f);
+        DrawCubeWrap(DebugPosition4, Color.red, Vector3.one * 3f);
     }
+    private void DrawCubeWrap(Vector3 position , Color color, Vector3 size)
+    {
+        if (position == null)
+            return;
+
+        var buffer = Gizmos.color;
+        Gizmos.color = color;
+        Gizmos.DrawCube(position, size);
+        Gizmos.color = buffer;
+    }
+    */
+
+
 }
