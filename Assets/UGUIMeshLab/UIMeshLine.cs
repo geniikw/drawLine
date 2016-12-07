@@ -294,10 +294,10 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
         if(p0.isNextCurve || p1.isPrvCurve)
         {
             float oneMinusT = 1f - t;
-            return
-                3f * oneMinusT * oneMinusT * (p0.nextCurvePoint - p0.point) +
-                6f * oneMinusT * t * (p1.prvCurvePoint - p0.nextCurvePoint) +
-                3f * t * t * (p1.point - p1.prvCurvePoint);
+            return Curve.CalculateBezierDerivative(p0.point, p1.point, p0.nextCurvePoint, p1.prvCurvePoint, t);
+                //3f * oneMinusT * oneMinusT * (p0.nextCurvePoint - p0.point) +
+                //6f * oneMinusT * t * (p1.prvCurvePoint - p0.nextCurvePoint) +
+                //3f * t * t * (p1.point - p1.prvCurvePoint);
         }
         return (p1.point - p0.point).normalized;
     }
@@ -414,7 +414,6 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
         }
         return false;
     }
-
     private bool CheckPointOnLine(LinePoint linePoint1, LinePoint linePoint2, Vector2 sp)
     {
         var p0 = transform.TransformPoint(linePoint1.point);
@@ -432,7 +431,6 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
             return CheckPointOnBezierCurve(p0, c0, c1, p1, sp);
         }
     }
-    
     private bool CheckPointOnBezierCurve(Vector3 p0, Vector3 c0, Vector3 c1, Vector3 p1, Vector2 sp)
     {
         // % int
