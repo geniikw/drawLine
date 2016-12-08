@@ -52,7 +52,7 @@ public class UIMeshLineEditor : Editor {
                 serializedObject.FindProperty("m_points").GetArrayElementAtIndex(n).FindPropertyRelative("point").vector2Value = ownerTrans.InverseTransformPoint(point);
                 serializedObject.ApplyModifiedProperties();
             }
-            
+            point = owner.transform.InverseTransformPoint(point);
 
             if (owner.GetPointInfo(n).isNextCurve)
             {
@@ -62,7 +62,8 @@ public class UIMeshLineEditor : Editor {
 
                 if (EditorGUI.EndChangeCheck())
                 {
-                    serializedObject.FindProperty("m_points").GetArrayElementAtIndex(n).FindPropertyRelative("nextCurveOffset").vector2Value 
+                    cp0 = owner.transform.InverseTransformPoint(cp0);
+                    serializedObject.FindProperty("m_points").GetArrayElementAtIndex(n).FindPropertyRelative("nextCurveOffset").vector2Value
                         = cp0 - point;
                     serializedObject.ApplyModifiedProperties();
                 }
@@ -76,11 +77,11 @@ public class UIMeshLineEditor : Editor {
                 Handles.Label(cp1, "curve" + n);
                 if (EditorGUI.EndChangeCheck())
                 {
+                    cp1 = owner.transform.InverseTransformPoint(cp1);
                     serializedObject.FindProperty("m_points").GetArrayElementAtIndex(n).FindPropertyRelative("prvCurveOffset").vector2Value
                         = cp1 - point;
                     serializedObject.ApplyModifiedProperties();
                 }
-
             }
         }
 
