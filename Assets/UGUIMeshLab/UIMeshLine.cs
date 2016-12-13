@@ -87,102 +87,57 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
         float ratio = GetLength(index)/lineLength;
         float ratioEnd = GetLength(index + 1)/lineLength;
 
-        if (IsCurve(index))
-        {
+        //if (IsCurve(index))
+        //{
             //draw curve line.
-            float curveLength = 0f;
-            float currentRatio = ratio;
-            var divideCount = m_points[index].nextCurveDivideCount;
+        float curveLength = 0f;
+        float currentRatio = ratio;
+        var divideCount = m_points[index].nextCurveDivideCount;
 
-            for (int n = 0; n < divideCount; n++)
-            {
-                Vector3 p0 = EvaluatePoint(index, 1f / divideCount * n);
-                Vector3 p1 = EvaluatePoint(index, 1f / divideCount * (n + 1));
-                curveLength += Vector2.Distance(p0, p1);
-            }
-
-            for (int n = 0; n < divideCount; n++)
-            {
-                float t0 = 1f / divideCount * n;
-                float t1 = 1f / divideCount * (n + 1);
-                Vector3 p0 = EvaluatePoint(index, t0);
-                Vector3 p1 = EvaluatePoint(index, t1);
-
-                var w0 = eachWidth ? EvaluateWidth(index, t0) : m_width;
-                var w1 = eachWidth? EvaluateWidth(index, t1) : m_width;
-
-                Color c0 = useGradient ? gradient.Evaluate(currentRatio) : color;
-                float deltaRatio = Vector2.Distance(p0, p1) / curveLength * (ratioEnd - ratio);
-                currentRatio += deltaRatio;
-                Color c1 = useGradient ? gradient.Evaluate(currentRatio) : color;
-
-                ///check final
-                //float length = GetLength(index + 1);
-                bool isFinal = false;
-                if (currentRatio > m_lengthRatio)
-                {
-                    currentRatio -= deltaRatio;
-                    float targetlength = lineLength * m_lengthRatio;
-                    Vector3 lineVector = p1 - p0;
-                    p1 = p0 + lineVector.normalized * (targetlength - lineLength * currentRatio);
-                    isFinal = true;
-                }
-
-                if (roundEdge && index == 0 && n == 0)
-                {
-                    DrawRoundEdge(vh, p0, p1, c0 ,w0);
-                }
-                if (roundEdge && (index == m_points.Count - 2 && n == divideCount - 1 || isFinal))
-                {
-                    DrawRoundEdge(vh, p1, p0, c1, w1);
-                }
-
-                var quad = MakeQuad(vh, p0, p1, c0, c1, prvVert,w0,w1);
-
-                if (fillLineJoint && prvLineVert != null)
-                {
-                    FillJoint(vh, quad[0], quad[1], prvLineVert, c0);
-                    prvLineVert = null;
-                }
-
-                if (isFinal)
-                    break;
-
-                if (prvVert == null) { prvVert = new UIVertex[2]; }
-                prvVert[0] = quad[3];
-                prvVert[1] = quad[2];
-            }
-        }
-        else
+        for (int n = 0; n < divideCount; n++)
         {
-            //draw direction line.
-            Vector3 p0 = m_points[index].point;
-            Vector3 p1 = m_points[index + 1].point;
+            Vector3 p0 = EvaluatePoint(index, 1f / divideCount * n);
+            Vector3 p1 = EvaluatePoint(index, 1f / divideCount * (n + 1));
+            curveLength += Vector2.Distance(p0, p1);
+        }
 
-            Color c0 = useGradient ? gradient.Evaluate(ratio) : color;
-            Color c1 = useGradient ? gradient.Evaluate(ratioEnd) : color;
+        for (int n = 0; n < divideCount; n++)
+        {
+            float t0 = 1f / divideCount * n;
+            float t1 = 1f / divideCount * (n + 1);
+            Vector3 p0 = EvaluatePoint(index, t0);
+            Vector3 p1 = EvaluatePoint(index, t1);
 
-            //todo length check
-            float length = GetLength(index + 1);
+            var w0 = eachWidth ? EvaluateWidth(index, t0) : m_width;
+            var w1 = eachWidth? EvaluateWidth(index, t1) : m_width;
+
+            Color c0 = useGradient ? gradient.Evaluate(currentRatio) : color;
+            float deltaRatio = Vector2.Distance(p0, p1) / curveLength * (ratioEnd - ratio);
+            currentRatio += deltaRatio;
+            Color c1 = useGradient ? gradient.Evaluate(currentRatio) : color;
+
+            ///check final
+            //float length = GetLength(index + 1);
             bool isFinal = false;
-            if (CheckLength(length))
+            if (currentRatio > m_lengthRatio)
             {
+                currentRatio -= deltaRatio;
                 float targetlength = lineLength * m_lengthRatio;
                 Vector3 lineVector = p1 - p0;
-                p1 = p0 + lineVector.normalized * (targetlength - GetLength(index));
+                p1 = p0 + lineVector.normalized * (targetlength - lineLength * currentRatio);
                 isFinal = true;
             }
 
-            if (roundEdge && index == 0)
+            if (roundEdge && index == 0 && n == 0)
             {
-                DrawRoundEdge(vh, p0, p1, c0);
+                DrawRoundEdge(vh, p0, p1, c0 ,w0);
             }
-            if (roundEdge && (index == m_points.Count - 2 || isFinal))
+            if (roundEdge && (index == m_points.Count - 2 && n == divideCount - 1 || isFinal))
             {
-                DrawRoundEdge(vh, p1, p0, c1);
+                DrawRoundEdge(vh, p1, p0, c1, w1);
             }
-            
-            var quad = MakeQuad(vh, p0, p1, c0, c1);
+
+            var quad = MakeQuad(vh, p0, p1, c0, c1, prvVert,w0,w1);
 
             if (fillLineJoint && prvLineVert != null)
             {
@@ -190,10 +145,55 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
                 prvLineVert = null;
             }
 
+            if (isFinal)
+                break;
+
             if (prvVert == null) { prvVert = new UIVertex[2]; }
             prvVert[0] = quad[3];
             prvVert[1] = quad[2];
         }
+        //}
+        //else
+        //{
+        //    //draw direction line.
+        //    Vector3 p0 = m_points[index].point;
+        //    Vector3 p1 = m_points[index + 1].point;
+
+        //    Color c0 = useGradient ? gradient.Evaluate(ratio) : color;
+        //    Color c1 = useGradient ? gradient.Evaluate(ratioEnd) : color;
+
+        //    //todo length check
+        //    float length = GetLength(index + 1);
+        //    bool isFinal = false;
+        //    if (CheckLength(length))
+        //    {
+        //        float targetlength = lineLength * m_lengthRatio;
+        //        Vector3 lineVector = p1 - p0;
+        //        p1 = p0 + lineVector.normalized * (targetlength - GetLength(index));
+        //        isFinal = true;
+        //    }
+
+        //    if (roundEdge && index == 0)
+        //    {
+        //        DrawRoundEdge(vh, p0, p1, c0);
+        //    }
+        //    if (roundEdge && (index == m_points.Count - 2 || isFinal))
+        //    {
+        //        DrawRoundEdge(vh, p1, p0, c1);
+        //    }
+            
+        //    var quad = MakeQuad(vh, p0, p1, c0, c1);
+
+        //    if (fillLineJoint && prvLineVert != null)
+        //    {
+        //        FillJoint(vh, quad[0], quad[1], prvLineVert, c0);
+        //        prvLineVert = null;
+        //    }
+
+        //    if (prvVert == null) { prvVert = new UIVertex[2]; }
+        //    prvVert[0] = quad[3];
+        //    prvVert[1] = quad[2];
+        //}
         return prvVert;
     } 
     void FillJoint( VertexHelper vh, UIVertex vp0, UIVertex vp1, UIVertex[] prvLineVert, Color color , float width = -1)
@@ -394,7 +394,7 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
         if (m_points[index].isNextCurve || m_points[index + 1].isPrvCurve)
             return true;
 
-        return true;//false;
+        return false;
     }
 
     public void DrawRoundEdge(VertexHelper vh, Vector2 p0, Vector2 p1, Color color, float width = -1)
