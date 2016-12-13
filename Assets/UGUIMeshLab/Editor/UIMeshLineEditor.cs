@@ -24,7 +24,7 @@ public class UIMeshLineEditor : Editor {
         {
             if (owner.IsCurve(n))
             {
-                for (int i = 0; i < owner.GetPointInfo(n).divideCount-1 ; i++)
+                for (int i = 0; i < owner.GetPointInfo(n).nextCurveDivideCount-1 ; i++)
                 {
                     Handles.DrawLine(owner.GetCurvePosition(n, i), owner.GetCurvePosition(n, i+1));
                 }

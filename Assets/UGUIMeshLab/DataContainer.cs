@@ -19,7 +19,10 @@ public struct LinePoint
         set { nextCurveOffset = value - point; } }
     public Vector2 prvCurvePoint {  get { return prvCurveOffset + point; } set { prvCurveOffset = value - point; } }
     [Range(1,100)]
-    public int divideCount;
+    public int nextCurveDivideCount;
+
+    public float width;
+
 
     public LinePoint(Vector3 p)
     {
@@ -29,7 +32,8 @@ public struct LinePoint
         nextCurveOffset = Vector3.zero;
         prvCurveOffset = Vector3.zero;
         isFold = false;
-        divideCount = 1;
+        nextCurveDivideCount = 1;
+        width = 1f;
     }
 
 #if UNITY_EDITOR

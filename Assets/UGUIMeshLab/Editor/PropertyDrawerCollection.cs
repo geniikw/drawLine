@@ -27,22 +27,32 @@ public class LinePointDrawer : PropertyDrawer {
             var positionNextBool = new Rect(position.x + 215, position.y + 16, 30f, 16f);
 
             var positionDivideCount = positionRect;
+            var positionWidth = positionRect;
+
             positionDivideCount.y += 16;
+            positionDivideCount.width += 16;
+            positionWidth.y += 32;
+            positionWidth.width += 16;
             
 
             if (next)
             {
                 positionNextBool.y += 16;
                 positionDivideCount.y += 16;
+                positionWidth.y += 16;
             }
             if (prv)
             {
                 positionRect.y += 16;
                 positionNextBool.y += 16;
                 positionDivideCount.y += 16;
+                positionWidth.y += 16;
             }
-            EditorGUI.PropertyField(positionDivideCount, property.FindPropertyRelative("divideCount"));
-            
+            EditorGUI.PropertyField(positionDivideCount, property.FindPropertyRelative("nextCurveDivideCount"));
+            EditorGUI.PropertyField(positionWidth, property.FindPropertyRelative("width"),false);
+
+
+
             EditorGUI.BeginProperty(position, label, property);
 
             EditorGUIUtility.labelWidth = 70f;
@@ -86,7 +96,7 @@ public class LinePointDrawer : PropertyDrawer {
         if (property.FindPropertyRelative("isFold").boolValue)
             return base.GetPropertyHeight(property, label);
 
-        float propertyHeight = 32f;
+        float propertyHeight = 48;
         if (property.FindPropertyRelative("isNextCurve").boolValue)
         {
             propertyHeight += 16f;

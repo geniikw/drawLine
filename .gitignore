@@ -28,7 +28,8 @@ sysinfo.txt
 .LSOverride
 
 # Icon must end with two \r
-Icon
+Icon
+
 
 # Thumbnails
 ._*
@@ -62,3 +63,19 @@ $RECYCLE.BIN/
 *.msi
 *.msm
 *.msp
+Assets/AssetStoreTools.meta
+Assets/AssetStoreTools/Editor.meta
+Assets/AssetStoreTools/Editor/AssetStoreTools.dll
+Assets/AssetStoreTools/Editor/AssetStoreTools.dll.meta
+Assets/AssetStoreTools/Editor/AssetStoreToolsExtra.dll
+Assets/AssetStoreTools/Editor/AssetStoreToolsExtra.dll.meta
+Assets/AssetStoreTools/Editor/DroidSansMono.ttf
+Assets/AssetStoreTools/Editor/DroidSansMono.ttf.meta
+Assets/AssetStoreTools/Editor/icon.png
+Assets/AssetStoreTools/Editor/icon.png.meta
+Assets/AssetStoreTools/Labels.asset
+Assets/AssetStoreTools/Labels.asset.meta
+Assets/Origin/Logo.unitypackage
+Assets/Origin/Logo.unitypackage.meta
+Assets/uimeshtool.unitypackage
+Assets/uimeshtool.unitypackage.meta

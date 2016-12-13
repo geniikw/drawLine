@@ -13,13 +13,10 @@ namespace UGUIAnimation
             var go = new GameObject();
 
             var line = go.AddComponent<UIMeshLine>();
-            LinePoint pointInfo = new LinePoint();
-            pointInfo.point = new Vector2(-50, 0);
+            
+            line.AddPoint(new LinePoint(new Vector2(-50, 0)));
+            line.AddPoint(new LinePoint(new Vector2(50, 0)));
 
-            line.AddPoint(pointInfo);
-
-            pointInfo.point = new Vector2(50, 0);
-            line.AddPoint(pointInfo);
             
             go.name = "MeshLine";
 
