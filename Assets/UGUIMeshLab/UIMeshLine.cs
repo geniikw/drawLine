@@ -26,6 +26,7 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
 
     public bool fillLineJoint = false;
     public float fillDivideAngle = 25f;
+    public float fillRatio = 1f;
           
     public float lineLength
     {
@@ -223,7 +224,7 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
             width = m_width;
         }
 
-        Vector3 cp0 = (p0 + p1- center*2).normalized * width * 0.5f + center;
+        Vector3 cp0 = (p0 + p1- center*2).normalized * width * fillRatio + center;
         float angle = Vector3.Angle(p0 - center, p1 - center);
 
         int currentVert = vh.currentVertCount;
