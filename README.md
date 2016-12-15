@@ -1,4 +1,4 @@
-# Draw mesh lins in UI Canvas
+# Draw mesh lines in UI Canvas
 Draw bezierCurve lines in Unity3d UI Canvas.
 
 Recent update:
