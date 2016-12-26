@@ -13,16 +13,19 @@ public struct LinePoint
     public bool isPrvCurve;
     public Vector2 prvCurveOffset;
 
-    public Vector2 nextCurvePoint {
+    public Vector2 nextCurvePoint
+    {
         get
         { return nextCurveOffset + point; }
-        set { nextCurveOffset = value - point; } }
-    public Vector2 prvCurvePoint {  get { return prvCurveOffset + point; } set { prvCurveOffset = value - point; } }
-    [Range(1,100)]
+        set { nextCurveOffset = value - point; }
+    }
+    public Vector2 prvCurvePoint { get { return prvCurveOffset + point; } set { prvCurveOffset = value - point; } }
+    [Range(1, 100)]
     public int nextCurveDivideCount;
-    [Range(1, 200)]
+    [Range(0, 200)]
     public float width;
 
+    public float angle;
 
     public LinePoint(Vector3 p)
     {
@@ -34,6 +37,7 @@ public struct LinePoint
         isFold = false;
         nextCurveDivideCount = 10;
         width = 10f;
+        angle = 0f;
     }
 
 #if UNITY_EDITOR
@@ -43,4 +47,3 @@ public struct LinePoint
     public bool isFold;
 #endif
 }
-
