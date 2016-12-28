@@ -6,5 +6,5 @@ Recent update:
 - 2. each point has local divide value instead global divide value.
 
 ![example](logoExample.webp)
-site(korean) : http://mypi.ruliweb.com/mypi.htm?nid=647825
-email : geniikw@gmail.com
+- site(korean) : http://mypi.ruliweb.com/mypi.htm?nid=647825
+- email : geniikw@gmail.com
