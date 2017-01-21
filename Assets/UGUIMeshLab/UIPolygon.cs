@@ -19,11 +19,17 @@ public class UIPolygon : MaskableGraphic, IMeshModifier
     public bool vertexColorFlag = false;
     
     [System.Serializable]
-    public class PolygonVertexInfo
+    public struct PolygonVertexInfo
     {
-        public Color color = Color.white;
+        public Color color;
         [Range(0f,1f)]
-        public float length = 1f;
+        public float length;
+
+        public PolygonVertexInfo(float length)
+        {
+            color = Color.white;
+            this.length = 1f;
+        }
     }
     
     public void ModifyMesh(VertexHelper vh)
@@ -48,14 +54,23 @@ public class UIPolygon : MaskableGraphic, IMeshModifier
 
         for (int n = 0; n < vertexInfoList.Count; n++)
         {
-            vh.AddVert(getRadiusPosition(vertexInfoList[n], n), checkVertexColor(vertexInfoList[n].color) ,Vector2.zero);
+            vh.AddVert(getRadiusPosition(vertexInfoList[n], n), checkVertexColor(vertexInfoList[n].color), Vector2.zero);
         }
 
         if (!innerPolygon)
         {
-            for (int n = 0; n < count - 2; n++)
+
+            int[] v = new int[3] { 0, 1, count - 1 };
+            int n = 0;
+            while (n < count-2)
             {
-                vh.AddTriangle(0, n + 1, n + 2);
+
+                if (n % 2 == 1) vh.AddTriangle(v[0], v[1], v[2]);
+                else vh.AddTriangle(v[0], v[2], v[1]);
+
+                    int change = (v[n % 3] == 0) ? 2 : (count - 2 - n) * (n % 2 == 1 ? 1 : -1);
+                v[n % 3] += change;
+                n++;
             }
         }
         else

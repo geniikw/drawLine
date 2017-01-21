@@ -94,9 +94,6 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
         float ratio = GetLength(index) / lineLength;
         float ratioEnd = GetLength(index + 1) / lineLength;
 
-        //if (IsCurve(index))
-        //{
-        //draw curve line.
         float curveLength = 0f;
         float currentRatio = ratio;
         var divideCount = m_points[index].nextCurveDivideCount;
@@ -162,48 +159,7 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
             prvVert[0] = quad[3];
             prvVert[1] = quad[2];
         }
-        //}
-        //else
-        //{
-        //    //draw direction line.
-        //    Vector3 p0 = m_points[index].point;
-        //    Vector3 p1 = m_points[index + 1].point;
-
-        //    Color c0 = useGradient ? gradient.Evaluate(ratio) : color;
-        //    Color c1 = useGradient ? gradient.Evaluate(ratioEnd) : color;
-
-        //    //todo length check
-        //    float length = GetLength(index + 1);
-        //    bool isFinal = false;
-        //    if (CheckLength(length))
-        //    {
-        //        float targetlength = lineLength * m_lengthRatio;
-        //        Vector3 lineVector = p1 - p0;
-        //        p1 = p0 + lineVector.normalized * (targetlength - GetLength(index));
-        //        isFinal = true;
-        //    }
-
-        //    if (roundEdge && index == 0)
-        //    {
-        //        DrawRoundEdge(vh, p0, p1, c0);
-        //    }
-        //    if (roundEdge && (index == m_points.Count - 2 || isFinal))
-        //    {
-        //        DrawRoundEdge(vh, p1, p0, c1);
-        //    }
-
-        //    var quad = MakeQuad(vh, p0, p1, c0, c1);
-
-        //    if (fillLineJoint && prvLineVert != null)
-        //    {
-        //        FillJoint(vh, quad[0], quad[1], prvLineVert, c0);
-        //        prvLineVert = null;
-        //    }
-
-        //    if (prvVert == null) { prvVert = new UIVertex[2]; }
-        //    prvVert[0] = quad[3];
-        //    prvVert[1] = quad[2];
-        //}
+       
         return prvVert;
     }
     void FillJoint(VertexHelper vh, UIVertex vp0, UIVertex vp1, UIVertex[] prvLineVert, Color color, float width = -1)
@@ -242,12 +198,12 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
 
         float unit = 1f / divideCount;
 
-        vh.AddVert(center, color, Vector2.zero);
+        vh.AddVert(center, color, Vector2.one * 0.5f);
         vh.AddVert(p0, color, Vector2.zero);
         for (int n = 0; n < divideCount; n++)
         {
             vh.AddVert(Curve.CalculateBezier(p0, p1, cp0, unit * (n + 1)), color, Vector2.zero);
-            vh.AddTriangle(currentVert, currentVert + 1 + n, currentVert + 2 + n);
+            vh.AddTriangle(currentVert + 2 + n,currentVert, currentVert + 1 + n);
         }
     }
     /// <summary>
@@ -426,13 +382,13 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
         int current = vh.currentVertCount;
         float angleUnit = Mathf.PI / (count - 1);
 
-        vh.AddVert(p0, color, Vector2.zero);
+        vh.AddVert(p0, color, Vector2.one *0.5f);
         vh.AddVert(p0 + widthVector, color, Vector2.zero);
 
         for (int n = 0; n < count; n++)
         {
             vh.AddVert(p0 + Mathf.Cos(angleUnit * n) * widthVector + Mathf.Sin(angleUnit * n) * lineVector, color, Vector2.zero);
-            vh.AddTriangle(current, current + 1 + n, current + 2 + n);
+            vh.AddTriangle(current, current + 2 + n, current + 1 + n);
         }
     }
 
