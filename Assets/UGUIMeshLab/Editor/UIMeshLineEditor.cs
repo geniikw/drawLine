@@ -87,3 +87,16 @@ public class UIMeshLineEditor : Editor {
 
     }
 }
+
+
+[CustomEditor(typeof(UIPolygon))]
+public class UIPolygonEditor : Editor
+{
+    UIPolygonEditor m_UIMeshLine;
+    UIPolygonEditor owner { get { return m_UIMeshLine ?? (m_UIMeshLine = target as UIPolygonEditor); } }
+
+    public override void OnInspectorGUI()
+    {
+        base.OnInspectorGUI();
+    }
+}
