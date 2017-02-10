@@ -34,10 +34,13 @@ public struct LinePoint
         isPrvCurve = false;
         nextCurveOffset = Vector3.zero;
         prvCurveOffset = Vector3.zero;
-        isFold = false;
         nextCurveDivideCount = 10;
         width = 10f;
         angle = 0f;
+
+#if UNITY_EDITOR
+        isFold = false;
+#endif
     }
 
 #if UNITY_EDITOR
