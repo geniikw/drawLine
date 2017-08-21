@@ -58,6 +58,17 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
             UpdateGeometry();
         }
     }
+    [SerializeField][Range(0,1)]
+    float m_startRatio = 1f;
+    public float startRatio
+    {
+        get { return m_startRatio; }
+        set
+        {
+            m_startRatio = value;
+            UpdateGeometry();
+        }
+    }
 
     /// UI Interface
     public void ModifyMesh(VertexHelper vh)
@@ -80,7 +91,10 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
         UIVertex[] prvVert = null;
         for (int n = 0; n < m_points.Count - 1; n++)
         {
-            if (CheckLength(GetLength(n)))
+            if (GetLength(n + 1) / lineLength <= m_startRatio)
+                continue;
+            
+            if (GetLength(n) / lineLength > m_lengthRatio)
             {
                 break;
             }
@@ -91,24 +105,42 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
     UIVertex[] DrawLine(int index, VertexHelper vh, UIVertex[] prvLineVert = null)
     {
         UIVertex[] prvVert = null;
-        float ratio = GetLength(index) / lineLength;
-        float ratioEnd = GetLength(index + 1) / lineLength;
+        var ll = lineLength;
+        float ratio0 = GetLength(index) / ll;
+        float ratio1 = GetLength(index + 1) / ll;
 
-        float curveLength = 0f;
-        float currentRatio = ratio;
+        float cl = 0f;
+        float currentRatio = ratio0;
         var divideCount = m_points[index].nextCurveDivideCount;
 
         for (int n = 0; n < divideCount; n++)
         {
             Vector3 p0 = EvaluatePoint(index, 1f / divideCount * n);
             Vector3 p1 = EvaluatePoint(index, 1f / divideCount * (n + 1));
-            curveLength += Vector2.Distance(p0, p1);
+            cl += Vector2.Distance(p0, p1);
         }
 
-        for (int n = 0; n < divideCount; n++)
+        float ni = 0;
+        float remain = 0f;
+        bool sFlag = false;
+        if(startRatio > ratio0 && startRatio < ratio1)
+        {
+            remain = (startRatio - ratio0)/(ratio1-ratio0);
+            ni = remain / (1f / divideCount);
+            sFlag = true;
+        }
+
+        for (int n =(int)ni; n < divideCount; n++)
         {
             float t0 = 1f / divideCount * n;
+            if (sFlag)
+            {
+                sFlag = false;
+                t0 = remain;
+            }
+
             float t1 = 1f / divideCount * (n + 1);
+
             Vector3 p0 = EvaluatePoint(index, t0);
             Vector3 p1 = EvaluatePoint(index, t1);
 
@@ -119,7 +151,7 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
             var a1 = useAngle ? Mathf.Lerp(m_points[index].angle, m_points[index + 1].angle, t1) : 0f;
 
             Color c0 = useGradient ? gradient.Evaluate(currentRatio) : color;
-            float deltaRatio = Vector2.Distance(p0, p1) / curveLength * (ratioEnd - ratio);
+            float deltaRatio = Vector2.Distance(p0, p1) / cl * (ratio1 - ratio0);
             currentRatio += deltaRatio;
             Color c1 = useGradient ? gradient.Evaluate(currentRatio) : color;
 
@@ -129,9 +161,9 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
             if (currentRatio > m_lengthRatio)
             {
                 currentRatio -= deltaRatio;
-                float targetlength = lineLength * m_lengthRatio;
+                float targetlength = ll * m_lengthRatio;
                 Vector3 lineVector = p1 - p0;
-                p1 = p0 + lineVector.normalized * (targetlength - lineLength * currentRatio);
+                p1 = p0 + lineVector.normalized * (targetlength - ll * currentRatio);
                 isFinal = true;
             }
 
@@ -300,10 +332,7 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
         }
         return (p1.point - p0.point).normalized;
     }
-    bool CheckLength(float currentLength)
-    {
-        return currentLength / lineLength > m_lengthRatio;
-    }
+  
     float GetLength(int index)
     {
         if (index <= 0)
