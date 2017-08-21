@@ -58,6 +58,8 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
             UpdateGeometry();
         }
     }
+    [Range(0,1)]
+    public float startRatio = 0f;
 
     /// UI Interface
     public void ModifyMesh(VertexHelper vh)
@@ -104,11 +106,22 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
             Vector3 p1 = EvaluatePoint(index, 1f / divideCount * (n + 1));
             curveLength += Vector2.Distance(p0, p1);
         }
-
+        var isFirst = true;
         for (int n = 0; n < divideCount; n++)
         {
+
             float t0 = 1f / divideCount * n;
             float t1 = 1f / divideCount * (n + 1);
+
+            if (t0 < startRatio)
+                continue;
+
+            if (isFirst)
+            {
+                t0 = startRatio;
+                isFirst = false;
+            }
+                        
             Vector3 p0 = EvaluatePoint(index, t0);
             Vector3 p1 = EvaluatePoint(index, t1);
 
@@ -119,6 +132,8 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
             var a1 = useAngle ? Mathf.Lerp(m_points[index].angle, m_points[index + 1].angle, t1) : 0f;
 
             Color c0 = useGradient ? gradient.Evaluate(currentRatio) : color;
+
+
             float deltaRatio = Vector2.Distance(p0, p1) / curveLength * (ratioEnd - ratio);
             currentRatio += deltaRatio;
             Color c1 = useGradient ? gradient.Evaluate(currentRatio) : color;
