@@ -47,6 +47,7 @@
 			{
 				// sample the texture
 				fixed4 col = tex2D(_MainTex, i.uv)*i.color;
+				
 				i.uv.x -= 0.5;
 
 				float t = abs(i.uv.x)*2;

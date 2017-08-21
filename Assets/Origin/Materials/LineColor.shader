@@ -1,4 +1,6 @@
-﻿// Simple "just colors" shader that's used for built-in debug visualizations,
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+// Simple "just colors" shader that's used for built-in debug visualizations,
 // in the editor etc. Just outputs _Color * vertex color; and blend/Z/cull/bias
 // controlled by material parameters.
 
@@ -42,7 +44,7 @@ Shader "lineColored"
 		v2f vert(appdata_t v)
 		{
 			v2f o;
-			o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+			o.vertex = UnityObjectToClipPos(v.vertex);
 			o.color = v.color * _Color;
 			return o;
 		}

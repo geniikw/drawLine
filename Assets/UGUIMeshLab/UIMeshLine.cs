@@ -58,6 +58,7 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
             UpdateGeometry();
         }
     }
+
     [SerializeField][Range(0,1)]
     float m_startRatio = 1f;
     public float startRatio
@@ -120,6 +121,7 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
             cl += Vector2.Distance(p0, p1);
         }
 
+
         float ni = 0;
         float remain = 0f;
         bool sFlag = false;
@@ -132,6 +134,7 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
 
         for (int n =(int)ni; n < divideCount; n++)
         {
+
             float t0 = 1f / divideCount * n;
             if (sFlag)
             {
@@ -151,7 +154,9 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
             var a1 = useAngle ? Mathf.Lerp(m_points[index].angle, m_points[index + 1].angle, t1) : 0f;
 
             Color c0 = useGradient ? gradient.Evaluate(currentRatio) : color;
+
             float deltaRatio = Vector2.Distance(p0, p1) / cl * (ratio1 - ratio0);
+
             currentRatio += deltaRatio;
             Color c1 = useGradient ? gradient.Evaluate(currentRatio) : color;
 
