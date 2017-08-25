@@ -60,7 +60,7 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
     }
 
     [SerializeField][Range(0,1)]
-    float m_startRatio = 1f;
+    float m_startRatio = 0f;
     public float startRatio
     {
         get { return m_startRatio; }
