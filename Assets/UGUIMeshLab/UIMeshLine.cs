@@ -26,6 +26,9 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
     public bool useGradient = false;
     public Gradient gradient;
 
+    public bool useLoop = false;
+
+
     public bool fillLineJoint = false;
     public float fillDivideAngle = 25f;
     public float fillRatio = 1f;
@@ -100,15 +103,23 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
                 break;
             }
             prvVert = DrawLine(n, vh, prvVert);
-
         }
     }
+
+    int CheckLoop(int index)
+    {
+        if (useLoop && index == m_points.Count - 1)
+            return 0;
+        return index;
+    }
+    
+
     UIVertex[] DrawLine(int index, VertexHelper vh, UIVertex[] prvLineVert = null)
     {
         UIVertex[] prvVert = null;
         var ll = lineLength;
         float ratio0 = GetLength(index) / ll;
-        float ratio1 = GetLength(index + 1) / ll;
+        float ratio1 = GetLength(CheckLoop(index + 1)) / ll;
 
         float cl = 0f;
         float currentRatio = ratio0;
@@ -120,8 +131,7 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
             Vector3 p1 = EvaluatePoint(index, 1f / divideCount * (n + 1));
             cl += Vector2.Distance(p0, p1);
         }
-
-
+        
         float ni = 0;
         float remain = 0f;
         bool sFlag = false;
@@ -150,8 +160,8 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
             var w0 = eachWidth ? EvaluateWidth(index, t0) : m_width;
             var w1 = eachWidth ? EvaluateWidth(index, t1) : m_width;
 
-            var a0 = useAngle ? Mathf.Lerp(m_points[index].angle, m_points[index + 1].angle, t0) : 0f;
-            var a1 = useAngle ? Mathf.Lerp(m_points[index].angle, m_points[index + 1].angle, t1) : 0f;
+            var a0 = useAngle ? Mathf.Lerp(m_points[index].angle, m_points[CheckLoop(index + 1)].angle, t0) : 0f;
+            var a1 = useAngle ? Mathf.Lerp(m_points[index].angle, m_points[CheckLoop(index + 1)].angle, t1) : 0f;
 
             Color c0 = useGradient ? gradient.Evaluate(currentRatio) : color;
 
@@ -321,11 +331,11 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
     }
     Vector2 EvaluatePoint(int index, float t)
     {
-        return EvaluatePoint(m_points[index], m_points[index + 1], t);
+        return EvaluatePoint(m_points[index], m_points[CheckLoop(index + 1)], t);
     }
     float EvaluateWidth(int index, float t)
     {
-        return Mathf.Lerp(m_points[index].width, m_points[index + 1].width, t);
+        return Mathf.Lerp(m_points[index].width, m_points[CheckLoop(index + 1)].width, t);
     }
 
 

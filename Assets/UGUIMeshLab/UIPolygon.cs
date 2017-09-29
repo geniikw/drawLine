@@ -21,6 +21,7 @@ public class UIPolygon : Image, IMeshModifier
     [System.Serializable]
     public struct PolygonVertexInfo
     {
+        //d
         public Color color;
         [Range(0f,1f)]
         public float length;

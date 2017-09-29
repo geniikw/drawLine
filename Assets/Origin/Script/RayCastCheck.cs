@@ -9,6 +9,7 @@ public class RayCastCheck : MonoBehaviour, IPointerEnterHandler,IPointerExitHand
     public void OnPointerEnter(PointerEventData eventData)
     {
         GetComponent<CanvasRenderer>().SetColor(Color.red);
+
     }
 
     public void OnPointerExit(PointerEventData eventData)
