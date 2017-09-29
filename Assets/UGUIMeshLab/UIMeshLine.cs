@@ -33,7 +33,7 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
     public float fillDivideAngle = 25f;
     public float fillRatio = 1f;
 
-    public float lineLength
+    public float LineLength
     {
         get
         {
@@ -95,10 +95,10 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
         UIVertex[] prvVert = null;
         for (int n = 0; n < m_points.Count - 1; n++)
         {
-            if (GetLength(n + 1) / lineLength <= m_startRatio)
+            if (GetLength(n + 1) / LineLength <= m_startRatio)
                 continue;
             
-            if (GetLength(n) / lineLength > m_lengthRatio)
+            if (GetLength(n) / LineLength > m_lengthRatio)
             {
                 break;
             }
@@ -117,9 +117,9 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
     UIVertex[] DrawLine(int index, VertexHelper vh, UIVertex[] prvLineVert = null)
     {
         UIVertex[] prvVert = null;
-        var ll = lineLength;
+        var ll = LineLength;
         float ratio0 = GetLength(index) / ll;
-        float ratio1 = GetLength(CheckLoop(index + 1)) / ll;
+        float ratio1 = GetLength(index + 1) / ll;
 
         float cl = 0f;
         float currentRatio = ratio0;
@@ -357,7 +357,7 @@ public class UIMeshLine : MaskableGraphic, IMeshModifier, ICanvasRaycastFilter
         float sum = 0f;
         for (int n = 0; n < index; n++)
         {
-            sum += Vector2.Distance(m_points[n].point, m_points[n + 1].point);
+            sum += Vector2.Distance(m_points[n].point, m_points[CheckLoop(n + 1)].point);
         }
         return sum;
     }
