@@ -1,7 +1,7 @@
 # Draw mesh lines in UI Canvas
 Draw bezierCurve lines in Unity3d UI Canvas.
 
-![example](logoExample.webp)
+![example](logoExample.gif)
 ![example](logoLaserShader.gif)
 ![example](polygon.png)
 
