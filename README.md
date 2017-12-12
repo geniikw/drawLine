@@ -10,7 +10,7 @@ Draw bezierCurve lines in Unity3d UI Canvas.
 
 - 3d version : https://github.com/geniikw/3DBezierMeshLine
 
-- Release conmercial version (5.5 USD)
+- Release commercial version (5.5 USD)
 
 rewrite all script. focus on optimization and animate position of node.
 but almost same.
