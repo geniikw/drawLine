@@ -1,6 +1,7 @@
 # Draw mesh lines in UI Canvas (Legacy)
 
-you can access new one. more utility, more option.
+you can access new one. more utility, more option, slightly better writing code.
+
 [AssetStore(free)](https://www.assetstore.unity3d.com/kr/#!/content/102377)
 
 [DataRenderer2D(github)](https://github.com/geniikw/DataRenderer2D)
